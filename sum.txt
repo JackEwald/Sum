@@ -1,0 +1,52 @@
+.pos 0x0
+    irmovl $0, %esi         # n = 0
+    irmovl output, %ebx     # base of output
+    irmovl data, %edi       # base of data
+
+main:
+    irmovl $0, %ecx         # sum = 0
+    irmovl $0, %eax         # x = 0
+
+summation:
+    irmovl $0, %edx         # mult = 0
+    irmovl $0, %ebp         # count = 0
+    
+mult:
+    addl   %eax, %edx       # mult += x
+    irmovl $1, %esp         # get ready to incr count
+    addl   %esp, %ebp       # count++
+    mrmovl (%edi), %esp     # end loop val (8)
+    subl   %ebp, %esp       # %esp = %esp - %ebp
+    jg     mult             # while(count < 8)
+
+calcsum:
+    addl   %edx, %ecx       # sum += mult
+    mrmovl 4(%edi), %ebp    # get ready to add b
+    addl   %ebp, %ecx       # sum += b
+    irmovl $1, %edx         # get ready to incr x
+    addl   %edx, %eax       # x++
+    
+    rrmovl %esi, %ebp
+    subl   %eax, %ebp       # %ebp = %ebp - %eax
+    jge    summation        # while(x <= n)
+    
+    rmmovl %ecx, (%ebx)     # output[n] = sum
+    irmovl $4, %edx         # compute next address of output 
+    addl   %edx, %ebx       # incr %ebx by 4 bytes
+    
+    irmovl $1, %edx         # get ready to incr n
+    addl   %edx, %esi       # n++
+    mrmovl 8(%edi), %ebp    # end main loop val (10)
+    subl   %esi, %ebp       # %ebp = %ebp - %esi
+    jge    main             # while(n <= 10)
+    
+    halt
+    
+.align 4
+data:
+    .long 0x8
+    .long 0xfffffffd
+    .long 0xa
+    
+output:
+    
